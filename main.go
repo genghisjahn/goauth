@@ -56,7 +56,6 @@ func main() {
 	sMsg.SetHash(privkey)
 	jsonmsg, _ := json.Marshal(sMsg)
 	fmt.Println("Hashed: ", sMsg.Hash)
-
 	fmt.Printf("SignedMessage: %v.\n", string(jsonmsg))
 	TestEqual(string(jsonmsg))
 }
