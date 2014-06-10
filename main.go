@@ -11,18 +11,17 @@ import (
 )
 
 /*
-	Just hold a store of 
+	Just hold a store of
 	username,pubkey,privkey,email
 	We can work out user accout creation later
 
 
 */
 
-
 /* These are just for demo purposes.  They don't work for any external service. */
 
 var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
-var	privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
+var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
 
 type BaseMessage struct {
 	PublicKey string
@@ -45,7 +44,7 @@ func (sm *SignedMessage) SetHash(privkey string) {
 	sm.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 func main() {
-	
+
 	_ = pubkey
 	_ = privkey
 	_, nonce := GenerateKey(32)
@@ -57,24 +56,24 @@ func main() {
 	sMsg.MessageInfo.Nonce = nonce
 	sMsg.MessageInfo.Body = "Get item id 42"
 	sMsg.SetHash(privkey)
-	jsonmsg,_:=json.Marshal(sMsg)
+	jsonmsg, _ := json.Marshal(sMsg)
 	fmt.Println("Hashed: ", sMsg.Hash)
 
 	fmt.Printf("SignedMessage: %v.\n", string(jsonmsg))
 	TestEqual(string(jsonmsg))
 }
 
-func TestEqual(jsonbody string){
+func TestEqual(jsonbody string) {
 	var sm SignedMessage
 	err := json.Unmarshal([]byte(jsonbody), &sm)
-	if err!=nil{
+	if err != nil {
 		fmt.Println("Something went wrong.")
 	}
-	fmt.Printf("\nReceived Hash: %v\n",sm.Hash)
+	fmt.Printf("\nReceived Hash: %v\n", sm.Hash)
 	// sm.MessageInfo.TimeStamp = time.Now().Local()
 	// _ ,sm.MessageInfo.Nonce = GenerateKey(32)
 	sm.SetHash(privkey)
-	fmt.Printf("Computed Hash: %v\n",sm.Hash)
+	fmt.Printf("Computed Hash: %v\n", sm.Hash)
 
 }
 
