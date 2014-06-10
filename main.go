@@ -45,8 +45,6 @@ func (sm *SignedMessage) SetHash(privkey string) {
 }
 func main() {
 
-	_ = pubkey
-	_ = privkey
 	_, nonce := GenerateKey(32)
 
 	sMsg := SignedMessage{}
@@ -70,8 +68,6 @@ func TestEqual(jsonbody string) {
 		fmt.Println("Something went wrong.")
 	}
 	fmt.Printf("\nReceived Hash: %v\n", sm.Hash)
-	// sm.MessageInfo.TimeStamp = time.Now().Local()
-	// _ ,sm.MessageInfo.Nonce = GenerateKey(32)
 	sm.SetHash(privkey)
 	fmt.Printf("Computed Hash: %v\n", sm.Hash)
 
