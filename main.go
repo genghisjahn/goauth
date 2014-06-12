@@ -6,7 +6,6 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -29,6 +28,7 @@ type BaseMessage struct {
 	Nonce     string
 	Verb      string
 	Body      string
+	URL       string
 }
 
 type SignedMessage struct {
@@ -42,20 +42,21 @@ func (sm *SignedMessage) SetHash(privkey []byte) {
 	h.Write([]byte(jsonbody))
 	sm.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
+
 func main() {
 
 }
 
-func IsValid(privatekey []byte, jsonbody string) bool {
+func IsValid(privatekey []byte, jsonbody string) (bool, error) {
 	var sm SignedMessage
 	err := json.Unmarshal([]byte(jsonbody), &sm)
 	if err != nil {
-		fmt.Println("Something went wrong.")
+		return false, err
 	}
 	hash1 := sm.Hash
 	sm.SetHash([]byte(privkey))
 	hash2 := sm.Hash
-	return hash1 == hash2
+	return hash1 == hash2, nil
 
 }
 
