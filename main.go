@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -21,6 +22,8 @@ import (
 
 var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
+
+var allowedtimedelta = 5
 
 type BaseMessage struct {
 	PublicKey string
@@ -47,11 +50,25 @@ func main() {
 
 }
 
+func isValidTimeStamp(timestamp time.Time) bool {
+	result := false
+	currenttime := time.Now().Local()
+	mintime := currenttime.Add(allowedtimedelta * time.Second * -1)
+	maxtime := currenttime.Add(allowedtimedelta * time.Second)
+	if timestamp >= mintime && timestampe <= maxtime {
+		result = true
+	}
+	return false
+}
+
 func Validate(privatekey []byte, jsonbody string) (bool, error) {
 	var sm SignedMessage
 	err := json.Unmarshal([]byte(jsonbody), &sm)
 	if err != nil {
 		return false, err
+	}
+	if !isValidTimeStamp(sm.MessageInfo.TimeStamp) {
+		return false, errors.New("Invalid time stamp.")
 	}
 	hash1 := sm.Hash
 	sm.SetHash([]byte(privkey))
