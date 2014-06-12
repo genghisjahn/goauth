@@ -36,39 +36,26 @@ type SignedMessage struct {
 	Hash        string
 }
 
-func (sm *SignedMessage) SetHash(privkey string) {
+func (sm *SignedMessage) SetHash(privkey []byte) {
 	jsonbody, _ := json.Marshal(sm.MessageInfo)
-	key := []byte(privkey)
-	h := hmac.New(sha512.New, key)
+	h := hmac.New(sha512.New, privkey)
 	h.Write([]byte(jsonbody))
 	sm.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 func main() {
 
-	_, nonce := GenerateKey(32)
-
-	sMsg := SignedMessage{}
-	sMsg.MessageInfo.PublicKey = pubkey
-	sMsg.MessageInfo.TimeStamp = time.Now().Local()
-	sMsg.MessageInfo.Verb = "get"
-	sMsg.MessageInfo.Nonce = nonce
-	sMsg.MessageInfo.Body = "Get item id 42"
-	sMsg.SetHash(privkey)
-	jsonmsg, _ := json.Marshal(sMsg)
-	fmt.Println("Hashed: ", sMsg.Hash)
-	fmt.Printf("SignedMessage: %v.\n", string(jsonmsg))
-	TestEqual(string(jsonmsg))
 }
 
-func TestEqual(jsonbody string) {
+func IsValid(privatekey []byte, jsonbody string) bool {
 	var sm SignedMessage
 	err := json.Unmarshal([]byte(jsonbody), &sm)
 	if err != nil {
 		fmt.Println("Something went wrong.")
 	}
-	fmt.Printf("\nReceived Hash: %v\n", sm.Hash)
-	sm.SetHash(privkey)
-	fmt.Printf("Computed Hash: %v\n", sm.Hash)
+	hash1 := sm.Hash
+	sm.SetHash([]byte(privkey))
+	hash2 := sm.Hash
+	return hash1 == hash2
 
 }
 
