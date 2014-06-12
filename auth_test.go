@@ -14,6 +14,30 @@ func TestValidAuth(t *testing.T) {
 	checkTest(t, true, []byte(privkey), string(jsonmsg), fmt.Sprintf("Supplied hash %v does not equal computed hash.\n", sMsg.Hash))
 }
 
+func TestInvalidURL(t *testing.T) {
+	sMsg := getTestMessage("http://www.jonwear.com", "get", "Get item 42.")
+	sMsg.SetHash([]byte(privkey))
+	sMsg.MessageInfo.URL = "http://www.slashdot.org"
+	jsonmsg, _ := json.Marshal(sMsg)
+	checkTest(t, false, []byte(privkey), string(jsonmsg), fmt.Sprintf("Changed URL %v should have generated an invalid hash.\n", sMsg.MessageInfo.URL))
+}
+
+func TestInvalidVerb(t *testing.T) {
+	sMsg := getTestMessage("http://www.jonwear.com", "get", "Get item 42.")
+	sMsg.SetHash([]byte(privkey))
+	sMsg.MessageInfo.Verb = "delete"
+	jsonmsg, _ := json.Marshal(sMsg)
+	checkTest(t, false, []byte(privkey), string(jsonmsg), fmt.Sprintf("Changed Verb %v should have generated an invalid hash.\n", sMsg.MessageInfo.Verb))
+}
+
+func TestInvalidMessage(t *testing.T) {
+	sMsg := getTestMessage("http://www.jonwear.com", "get", "Get item 42.")
+	sMsg.SetHash([]byte(privkey))
+	sMsg.MessageInfo.Body = "That's not true!  That's imPOSSible!"
+	jsonmsg, _ := json.Marshal(sMsg)
+	checkTest(t, false, []byte(privkey), string(jsonmsg), fmt.Sprintf("Changed Verb %v should have generated an invalid hash.\n", sMsg.MessageInfo.Verb))
+}
+
 func TestInvalidNonce(t *testing.T) {
 	sMsg := getTestMessage("http://www.jonwear.com", "get", "Get item 42.")
 	sMsg.SetHash([]byte(privkey))
