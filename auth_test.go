@@ -63,7 +63,7 @@ func TestInvalidDateTime(t *testing.T) {
 }
 
 func checkTest(t *testing.T, desired bool, privkey []byte, jsonmsg string, failmessage string) {
-	validtest, err := IsValid(privkey, jsonmsg)
+	validtest, err := Validate(privkey, jsonmsg)
 	if validtest != desired {
 		if err != nil {
 			t.Error(err)

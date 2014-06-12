@@ -47,7 +47,7 @@ func main() {
 
 }
 
-func IsValid(privatekey []byte, jsonbody string) (bool, error) {
+func Validate(privatekey []byte, jsonbody string) (bool, error) {
 	var sm SignedMessage
 	err := json.Unmarshal([]byte(jsonbody), &sm)
 	if err != nil {
