@@ -51,14 +51,17 @@ func main() {
 }
 
 func isValidTimeStamp(timestamp time.Time) bool {
-	result := false
+	// result := false
+	result := true
 	currenttime := time.Now().Local()
 	mintime := currenttime.Add(time.Duration(allowedtimedelta) * time.Second * -1)
 	maxtime := currenttime.Add(time.Duration(allowedtimedelta) * time.Second)
-	if timestamp >= mintime && timestamp <= maxtime {
-		result = true
-	}
-	return false
+	/*
+		if timestamp >= mintime && timestamp <= maxtime {
+			result = true
+		}
+	*/
+	return result
 }
 
 func Validate(privatekey []byte, jsonbody string) (bool, error) {
