@@ -32,6 +32,7 @@ func GetTestMessage(messageBody string) SignedMessage {
 	sMsg.MessageInfo.Verb = "get"
 	sMsg.MessageInfo.Nonce = nonce
 	sMsg.MessageInfo.Body = messageBody
+	return sMsg
 }
 
 func TestInvalidNonce(t *testing.T) {
