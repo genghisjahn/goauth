@@ -28,6 +28,7 @@ type BaseMessage struct {
 	Nonce     string
 	Verb      string
 	Body      string
+	URL       string
 }
 
 type SignedMessage struct {
