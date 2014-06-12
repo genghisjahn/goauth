@@ -53,9 +53,9 @@ func main() {
 func isValidTimeStamp(timestamp time.Time) bool {
 	result := false
 	currenttime := time.Now().Local()
-	mintime := currenttime.Add(allowedtimedelta * time.Second * -1)
-	maxtime := currenttime.Add(allowedtimedelta * time.Second)
-	if timestamp >= mintime && timestampe <= maxtime {
+	mintime := currenttime.Add(time.Duration(allowedtimedelta) * time.Second * -1)
+	maxtime := currenttime.Add(time.Duration(allowedtimedelta) * time.Second)
+	if timestamp >= mintime && timestamp <= maxtime {
 		result = true
 	}
 	return false
