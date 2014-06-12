@@ -35,7 +35,7 @@ func TestInvalidMessage(t *testing.T) {
 	sMsg.SetHash([]byte(privkey))
 	sMsg.MessageInfo.Body = "That's not true!  That's imPOSSible!"
 	jsonmsg, _ := json.Marshal(sMsg)
-	checkTest(t, false, []byte(privkey), string(jsonmsg), fmt.Sprintf("Changed Verb %v should have generated an invalid hash.\n", sMsg.MessageInfo.Verb))
+	checkTest(t, false, []byte(privkey), string(jsonmsg), fmt.Sprintf("Changed Message %v should have generated an invalid hash.\n", sMsg.MessageInfo.Verb))
 }
 
 func TestInvalidNonce(t *testing.T) {
