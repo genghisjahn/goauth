@@ -23,7 +23,7 @@ func TestValidAuth(t *testing.T) {
 	}
 }
 
-func TestInvalidNonce(t *testing.T) {
+func GetTestMessage(messageBody string) SignedMessage {
 	_, nonce := GenerateKey(32)
 
 	sMsg := SignedMessage{}
@@ -31,7 +31,11 @@ func TestInvalidNonce(t *testing.T) {
 	sMsg.MessageInfo.TimeStamp = time.Now().Local()
 	sMsg.MessageInfo.Verb = "get"
 	sMsg.MessageInfo.Nonce = nonce
-	sMsg.MessageInfo.Body = "Get item id 42"
+	sMsg.MessageInfo.Body = messageBody
+}
+
+func TestInvalidNonce(t *testing.T) {
+	sMsg := GetTestMessage("Get item 42.")
 	sMsg.SetHash([]byte(privkey))
 	_, sMsg.MessageInfo.Nonce = GenerateKey(32)
 	jsonmsg, _ := json.Marshal(sMsg)
