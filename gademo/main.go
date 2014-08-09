@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -51,25 +50,16 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
-	url := "http://localhost:8090/process"
-	client := &http.Client{}
+	posturl := "http://localhost:8090/process"
 
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))
-	order := BuildOrder(numshares, maxprice, "GET", url)
-	signedMsg := SignedMessage{}
-	signedMsg.Order = order
-	signedMsg.SetHash([]byte(privkey))
-	r.Form.Add("message", signedMsg)
-	req, _ := http.NewRequest("GET", url, nil)
-	res, _ := client.Do(req)
+	order := BuildOrder(numshares, maxprice, "GET", posturl)
+	signedMsg := SignedMessage{Order: order}
 
-	if contents, err := ioutil.ReadAll(res.Body); err == nil {
-		fmt.Fprintf(w, fmt.Sprintf("Response: %v", string(contents)))
-	} else {
-		fmt.Fprintf(w, fmt.Sprintf("Error: %v", err))
-	}
-	res.Body.Close()
+	signedMsg.SetHash([]byte(privkey))
+	fmt.Fprintf(w, "HELLO")
+
 }
 
 func BuildOrder(numshares int, maxprice int, url string, verb string) OrderMessage {
