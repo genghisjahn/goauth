@@ -1,4 +1,4 @@
-package main
+package goauth
 
 import (
 	"crypto/hmac"
