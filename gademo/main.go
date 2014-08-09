@@ -65,12 +65,15 @@ func sendHandler(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 
 	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(string(sm)))
-	req.Header.Add("pubkey", string(signedMsg.Order.PublicKey))
 	resp, _ := client.Do(req)
 	fmt.Println(resp.Status)
 	defer resp.Body.Close()
 	contents, _ := ioutil.ReadAll(resp.Body)
 	w.Header().Set("Content-Type", "application/json")
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		http.Error(w, string(contents), resp.StatusCode)
+		return
+	}
 	w.Write(contents)
 }
 
