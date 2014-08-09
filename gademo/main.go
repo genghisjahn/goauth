@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"text/template"
 	"time"
@@ -50,15 +52,22 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
-	posturl := "http://localhost:8090/process"
+	remoteUrl := "http://localhost:8090/process"
 
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))
-	order := BuildOrder(numshares, maxprice, "GET", posturl)
+	order := BuildOrder(numshares, maxprice, remoteUrl, "POST")
 	signedMsg := SignedMessage{Order: order}
 
 	signedMsg.SetHash([]byte(privkey))
-	fmt.Fprintf(w, "HELLO")
+	sm, _ := json.Marshal(signedMsg)
+	res, _ := http.PostForm(remoteUrl,
+		url.Values{"signedMsg": {string(sm)}})
+
+	//res, _ := http.Get(remoteUrl)
+	defer res.Body.Close()
+	contents, _ := ioutil.ReadAll(res.Body)
+	fmt.Fprintf(w, "Contents:", string(contents))
 
 }
 

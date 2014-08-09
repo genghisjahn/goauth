@@ -1,8 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -22,11 +26,20 @@ type SignedMessage struct {
 }
 
 func main() {
-	http.HandleFunc("/process/", processHandler)
+	http.HandleFunc("/process", processHandler)
 	http.ListenAndServe(":8090", nil)
 }
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
+	sm := SignedMessage{}
+	body, _ := ioutil.ReadAll(r.Body)
+	jsonBody, _ := url.QueryUnescape(string(body))
+	jsonBody = strings.Replace(jsonBody, "signedMsg=", "", 1)
+	json.Unmarshal([]byte(jsonBody), &sm)
+	log.Println("PublicKey: ", string(sm.Order.PublicKey))
+	log.Println("Nonce: ", string(sm.Order.Nonce))
+	log.Println("OrderDateTime: ", sm.Order.OrderDateTime)
+	log.Println("Verb: ", sm.Order.Verb)
+	log.Println("Hash ", sm.Hash)
 
-	fmt.Fprintf(w, "HELLO")
 }
