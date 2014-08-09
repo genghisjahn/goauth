@@ -1,14 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+
 	"net/http"
-	"net/url"
 	"strconv"
 	"text/template"
 	"time"
@@ -61,14 +62,16 @@ func sendHandler(w http.ResponseWriter, r *http.Request) {
 
 	signedMsg.SetHash([]byte(privkey))
 	sm, _ := json.Marshal(signedMsg)
-	res, _ := http.PostForm(remoteUrl,
-		url.Values{"signedMsg": {string(sm)}})
+	client := &http.Client{}
 
-	//res, _ := http.Get(remoteUrl)
-	defer res.Body.Close()
-	contents, _ := ioutil.ReadAll(res.Body)
-	fmt.Fprintf(w, "Contents:", string(contents))
-
+	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(string(sm)))
+	req.Header.Add("pubkey", string(signedMsg.Order.PublicKey))
+	resp, _ := client.Do(req)
+	fmt.Println(resp.Status)
+	defer resp.Body.Close()
+	contents, _ := ioutil.ReadAll(resp.Body)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(contents)
 }
 
 func BuildOrder(numshares int, maxprice int, url string, verb string) OrderMessage {
