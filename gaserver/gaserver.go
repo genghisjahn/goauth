@@ -47,7 +47,7 @@ var nonceLog = map[string]time.Time{}
 
 func main() {
 	http.HandleFunc("/process", processHandler)
-	http.ListenAndServe(":8090", nil)
+	http.ListenAndServe("192.168.1.7:8090", nil)
 }
 
 func processHandler(w http.ResponseWriter, r *http.Request) {

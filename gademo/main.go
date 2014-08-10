@@ -53,7 +53,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
-	remoteUrl := "http://localhost:8090/process"
+	remoteUrl := "http://www.order-demo.com:8090/process"
 
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))
