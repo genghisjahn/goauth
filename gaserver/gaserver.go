@@ -38,6 +38,7 @@ const PUBLIC_KEY_NOT_FOUND = "Public Key not found"
 const DUPLICATE_NONCE = "Duplicate Nonce"
 const EXPIRED_TIMESTAMP = "Expired Timestamp"
 const INVALID_HASH = "Invalid Hash"
+const INVALID_JSON = "Invalid JSON"
 const ORDER_SUCCESS = "Order processed successfully | No. Shares %v | Max Price $%v |"
 
 var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
@@ -67,7 +68,11 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 	sm := SignedMessage{}
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	json.Unmarshal([]byte(body), &sm)
+	if err := json.Unmarshal([]byte(body), &sm); err != nil {
+		http.Error(w, INVALID_JSON, http.StatusBadRequest)
+		log.Println(INVALID_JSON)
+		return
+	}
 	sm.Order.Verb = strings.ToUpper(r.Method)
 	rm := ProcessMessage(sm)
 	if !rm.Success {

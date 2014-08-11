@@ -16,12 +16,13 @@ func main() {
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	oMsg := GetOriginalMessage(w, r)
-
-	result, status := ProcessNormalOrder(oMsg)
+	_ = oMsg
+	//result, status := ProcessNormalOrder(oMsg)
 	//result, status := ProcessChangedOrder(oMsg)
 	//result, status := ProcessRepeatOrder(oMsg)
 	//result, status := ProcessDelayOrder(oMsg)
 	//result, status := ProcessDelayRepeatOrder(oMsg)
+	result, status := ProcessInvalidJson()
 
 	w.Header().Set("Content-Type", "application/json")
 	if status < 200 || status > 299 {
@@ -32,7 +33,12 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProcessNormalOrder(oMsg SignedMessage) ([]byte, int) {
-	return processOrder(oMsg)
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	return processOrder(string(jsonNewMsg))
+}
+
+func ProcessInvalidJson() ([]byte, int) {
+	return processOrder("INVALID JSON")
 }
 
 func ProcessChangedOrder(oMsg SignedMessage) ([]byte, int) {
@@ -42,30 +48,34 @@ func ProcessChangedOrder(oMsg SignedMessage) ([]byte, int) {
 	log.Printf("Changing numShares from %v to %v\n", oMsg.Order.NumShares, newNumShares)
 	oMsg.Order.MaxPrice = newMaxPrice
 	oMsg.Order.NumShares = newNumShares
-	return processOrder(oMsg)
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	return processOrder(string(jsonNewMsg))
 }
 
 func ProcessRepeatOrder(oMsg SignedMessage) ([]byte, int) {
-	data1, code1 := processOrder(oMsg)
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	data1, code1 := processOrder(string(jsonNewMsg))
 	time.Sleep(100 * time.Millisecond)
-	processOrder(oMsg)
+	processOrder(string(jsonNewMsg))
 	return data1, code1
 
 }
 
 func ProcessDelayRepeatOrder(oMsg SignedMessage) ([]byte, int) {
-	data1, code1 := processOrder(oMsg)
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	data1, code1 := processOrder(string(jsonNewMsg))
 	go func() {
 		time.Sleep(7000 * time.Millisecond)
-		processOrder(oMsg)
+		processOrder(string(jsonNewMsg))
 
 	}()
 	return data1, code1
 }
 
 func ProcessDelayOrder(oMsg SignedMessage) ([]byte, int) {
+	jsonNewMsg, _ := json.Marshal(oMsg)
 	time.Sleep(7000 * time.Millisecond)
-	return processOrder(oMsg)
+	return processOrder(string(jsonNewMsg))
 }
 
 func GetOriginalMessage(w http.ResponseWriter, r *http.Request) SignedMessage {
@@ -76,11 +86,10 @@ func GetOriginalMessage(w http.ResponseWriter, r *http.Request) SignedMessage {
 	return originalMsg
 }
 
-func processOrder(oMsg SignedMessage) ([]byte, int) {
+func processOrder(jsonNewMsg string) ([]byte, int) {
 	client := &http.Client{}
 	remoteUrl := "http://192.168.1.7:8090/process"
-	jsonNewMsg, _ := json.Marshal(oMsg)
-	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(string(jsonNewMsg)))
+	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(jsonNewMsg))
 	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 	contents, _ := ioutil.ReadAll(resp.Body)
