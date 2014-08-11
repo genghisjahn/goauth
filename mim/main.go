@@ -17,12 +17,12 @@ func main() {
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	oMsg := GetOriginalMessage(w, r)
 	_ = oMsg
-	//result, status := ProcessNormalOrder(oMsg)
+	result, status := ProcessNormalOrder(oMsg)
 	//result, status := ProcessChangedOrder(oMsg)
 	//result, status := ProcessRepeatOrder(oMsg)
 	//result, status := ProcessDelayOrder(oMsg)
 	//result, status := ProcessDelayRepeatOrder(oMsg)
-	result, status := ProcessInvalidJson()
+	//result, status := ProcessInvalidJson()
 
 	w.Header().Set("Content-Type", "application/json")
 	if status < 200 || status > 299 {

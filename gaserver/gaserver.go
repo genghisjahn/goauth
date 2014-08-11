@@ -57,7 +57,7 @@ func ClearNonces() {
 		for key, value := range nonceLog {
 			duration := time.Since(value)
 			if duration > 5*time.Second {
-				fmt.Printf("EXPIRED NONCE %v  at %v\n", value, time.Now().Local())
+				log.Printf("EXPIRED NONCE %v  at %v\n", value, time.Now().Local())
 				delete(nonceLog, key)
 			}
 		}
