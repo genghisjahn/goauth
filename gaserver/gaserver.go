@@ -63,9 +63,10 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, rm.Message, http.StatusBadRequest)
 		}
+		log.Println(rm)
 		return
 	}
-
+	log.Println(rm)
 	rmJson, _ := json.Marshal(rm)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(rmJson)
