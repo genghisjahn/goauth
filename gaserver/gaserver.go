@@ -36,7 +36,7 @@ type ReturnMessage struct {
 
 const PUBLIC_KEY_NOT_FOUND = "Public Key not found"
 const DUPLICATE_NONCE = "Duplicate Nonce"
-const INVALID_DATE = "Invalid Date"
+const EXPIRED_TIMESTAMP = "Expired Timestamp"
 const INVALID_HASH = "Invalid Hash"
 const ORDER_SUCCESS = "Order processed successfully"
 
@@ -46,10 +46,23 @@ var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4w
 var nonceLog = map[string]time.Time{}
 
 func main() {
+	go ClearNonces()
 	http.HandleFunc("/process", processHandler)
-	http.ListenAndServe(":8090", nil)
+	http.ListenAndServe("192.168.1.7:8090", nil)
 }
 
+func ClearNonces() {
+	for {
+		for key, value := range nonceLog {
+			duration := time.Since(value)
+			if duration > 5*time.Second {
+				fmt.Printf("EXPIRED NONCE %v  at %v\n", value, time.Now().Local())
+				delete(nonceLog, key)
+			}
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+}
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	sm := SignedMessage{}
 	body, _ := ioutil.ReadAll(r.Body)
@@ -63,9 +76,10 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, rm.Message, http.StatusBadRequest)
 		}
+		log.Println(rm)
 		return
 	}
-
+	log.Println(rm)
 	rmJson, _ := json.Marshal(rm)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(rmJson)
@@ -100,8 +114,8 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 		This prevents delay attacks.
 	*/
 	duration := time.Since(sm.Order.OrderDateTime)
-	if duration > 5*time.Second {
-		rm.Message = INVALID_DATE
+	if duration > 3*time.Second {
+		rm.Message = EXPIRED_TIMESTAMP
 		return rm
 	}
 
