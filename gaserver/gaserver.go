@@ -38,7 +38,7 @@ const PUBLIC_KEY_NOT_FOUND = "Public Key not found"
 const DUPLICATE_NONCE = "Duplicate Nonce"
 const EXPIRED_TIMESTAMP = "Expired Timestamp"
 const INVALID_HASH = "Invalid Hash"
-const ORDER_SUCCESS = "Order processed successfully"
+const ORDER_SUCCESS = "Order processed successfully | No. Shares %v | Max Price $%v |"
 
 var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
@@ -134,7 +134,7 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 		//The request is valid.
 		//ProcessOrder(sm)
 		rm.Success = true
-		rm.Message = ORDER_SUCCESS
+		rm.Message = fmt.Sprintf(ORDER_SUCCESS, sm.Order.NumShares, sm.Order.MaxPrice)
 	}
 
 	return rm
