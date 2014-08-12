@@ -41,6 +41,7 @@ const (
 	EXPIRED_TIMESTAMP    = "Expired Timestamp"
 	INVALID_HASH         = "Invalid Hash"
 	INVALID_JSON         = "Invalid JSON"
+	INVALID_URL          = "Invalid URL %v"
 	ORDER_SUCCESS        = "Order processed successfully | No. Shares %v | Max Price $%v |"
 )
 
@@ -81,6 +82,9 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sm.Order.Verb = strings.ToUpper(r.Method)
+	log.Println("Request URL: ", r.Host)
+	log.Println("Order URL: ", sm.Order.URL)
+
 	rm := ProcessMessage(sm)
 	if !rm.Success {
 		if rm.Message == PUBLIC_KEY_NOT_FOUND {
@@ -101,6 +105,14 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 func ProcessMessage(sm SignedMessage) ReturnMessage {
 	rm := ReturnMessage{}
 	rm.DateTime = time.Now().Local()
+
+	/* Check for the correct URL
+	This demo should only process requests mean for: www.order-demo.com:8090
+	*/
+	if sm.Order.URL != "http://www.order-demo.com:8090/process" {
+		rm.Message = fmt.Sprintf(INVALID_URL, sm.Order.URL)
+		return rm
+	}
 
 	/*
 	   Check for a valid public key.
