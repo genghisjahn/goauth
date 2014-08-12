@@ -21,7 +21,7 @@ import (
 var (
 	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
-	httpAddr = flag.String("http", "http://www.order-demo.com:8090", "Server address")
+	httpAddr = flag.String("http", "www.order-demo.com:8090", "Server address")
 )
 
 func main() {
@@ -61,7 +61,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
-	remoteUrl := fmt.Sprintf("%v/process", *httpAddr)
+	remoteUrl := fmt.Sprintf("http://%v/process", *httpAddr)
 	log.Printf("Remote URL: %v\n", remoteUrl)
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))

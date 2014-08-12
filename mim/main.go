@@ -3,15 +3,25 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 )
 
+var (
+	inHttpAddr  = flag.String("inhttp", "192.168.1.50:8090", "Accept requests at this address.")
+	outHttpAddr = flag.String("outhttp", "192.168.1.7:8090", "Send requests to this address")
+)
+
 func main() {
+	flag.Parse()
 	http.HandleFunc("/process", processHandler)
-	http.ListenAndServe("192.168.1.50:8090", nil)
+	log.Printf("Listening on: %v\n", *inHttpAddr)
+	log.Printf("Sending to: %v\n", *outHttpAddr)
+	http.ListenAndServe(*inHttpAddr, nil)
 }
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +98,7 @@ func GetOriginalMessage(w http.ResponseWriter, r *http.Request) SignedMessage {
 
 func processOrder(jsonNewMsg string) ([]byte, int) {
 	client := &http.Client{}
-	remoteUrl := "http://192.168.1.7:8090/process"
+	remoteUrl := fmt.Sprintf("http://%v/process", *outHttpAddr)
 	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(jsonNewMsg))
 	resp, _ := client.Do(req)
 	defer resp.Body.Close()
