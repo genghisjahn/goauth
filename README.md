@@ -16,4 +16,5 @@ To run locally, first:
 6. cd to the `gaserver` directory and run `go run gaserver.go -http [IP_From_Step_3]:8090`  
 7. cd to the `mim` directory and run `go run main.go -outhttp [IP_From_Step_4]:8090`  
 8. cd to the `gademo` director and run `go run main.go`.  If the previous steps have been done correctly, you won't need to specify any command line arguments for this command.  
-9. Open a browser and naviagte to http://localhost:8080.
+9. Open a browser and naviagte to [http://localhost:8080](http://localhost:8080).  
+10. Enter an integer for `No. Shares` and `Max Price` and then click `Save`
