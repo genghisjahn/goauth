@@ -26,7 +26,6 @@ func main() {
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	oMsg := GetOriginalMessage(w, r)
-	_ = oMsg
 	result, status := ProcessNormalOrder(oMsg)
 	//result, status := ProcessChangedOrder(oMsg)
 	//result, status := ProcessRepeatOrder(oMsg)
