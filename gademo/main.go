@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
@@ -14,8 +15,6 @@ import (
 	"strconv"
 	"text/template"
 	"time"
-
-	"github.com/genghisjahn/goauth"
 )
 
 var (
@@ -92,7 +91,7 @@ func BuildOrder(numshares int, maxprice int, url string, verb string) OrderMessa
 	result.MaxPrice = maxprice
 
 	result.PublicKey = []byte(pubkey)
-	result.Nonce, _ = goauth.GenerateKey(32)
+	result.Nonce, _ = GenerateKey(32)
 	result.OrderDateTime = time.Now().Local()
 	result.Verb = verb
 	result.URL = url
@@ -104,4 +103,11 @@ func (sm *SignedMessage) SetHash(privkey []byte) {
 	h := hmac.New(sha512.New, privkey)
 	h.Write([]byte(jsonbody))
 	sm.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func GenerateKey(keylength int) ([]byte, string) {
+	key := make([]byte, keylength)
+	rand.Read(key)
+	base64str := base64.StdEncoding.EncodeToString(key)
+	return key, base64str
 }
