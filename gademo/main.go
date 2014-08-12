@@ -62,7 +62,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
 	remoteUrl := fmt.Sprintf("http://%v/process", *httpAddr)
-	log.Printf("Remote URL: %v\n", remoteUrl)
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))
 	order := BuildOrder(numshares, maxprice, remoteUrl, "POST")

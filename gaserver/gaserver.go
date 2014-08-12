@@ -82,8 +82,6 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sm.Order.Verb = strings.ToUpper(r.Method)
-	log.Println("Request URL: ", r.Host)
-	log.Println("Order URL: ", sm.Order.URL)
 
 	rm := ProcessMessage(sm)
 	if !rm.Success {
