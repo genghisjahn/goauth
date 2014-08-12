@@ -30,9 +30,11 @@ type SignedMessage struct {
 }
 
 type ReturnMessage struct {
-	Message  string
-	DateTime time.Time
-	Success  bool
+	Message   string
+	NumShares int
+	MaxPrice  int
+	DateTime  time.Time
+	Success   bool
 }
 
 const (
@@ -42,7 +44,7 @@ const (
 	INVALID_HASH         = "Invalid Hash"
 	INVALID_JSON         = "Invalid JSON"
 	INVALID_URL          = "Invalid URL %v"
-	ORDER_SUCCESS        = "Order processed successfully | No. Shares %v | Max Price $%v |"
+	ORDER_SUCCESS        = "Order processed successfully"
 )
 
 var (
@@ -155,9 +157,10 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 		rm.Message = INVALID_HASH
 	} else {
 		//The request is valid.
-		//ProcessOrder(sm)
 		rm.Success = true
-		rm.Message = fmt.Sprintf(ORDER_SUCCESS, sm.Order.NumShares, sm.Order.MaxPrice)
+		rm.MaxPrice = sm.Order.MaxPrice
+		rm.NumShares = sm.Order.NumShares
+		rm.Message = ORDER_SUCCESS
 	}
 
 	return rm
