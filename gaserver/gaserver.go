@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -34,22 +35,28 @@ type ReturnMessage struct {
 	Success  bool
 }
 
-const PUBLIC_KEY_NOT_FOUND = "Public Key not found"
-const DUPLICATE_NONCE = "Duplicate Nonce"
-const EXPIRED_TIMESTAMP = "Expired Timestamp"
-const INVALID_HASH = "Invalid Hash"
-const INVALID_JSON = "Invalid JSON"
-const ORDER_SUCCESS = "Order processed successfully | No. Shares %v | Max Price $%v |"
+const (
+	PUBLIC_KEY_NOT_FOUND = "Public Key not found"
+	DUPLICATE_NONCE      = "Duplicate Nonce"
+	EXPIRED_TIMESTAMP    = "Expired Timestamp"
+	INVALID_HASH         = "Invalid Hash"
+	INVALID_JSON         = "Invalid JSON"
+	ORDER_SUCCESS        = "Order processed successfully | No. Shares %v | Max Price $%v |"
+)
 
-var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
-var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
-
-var nonceLog = map[string]time.Time{}
+var (
+	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
+	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
+	nonceLog = map[string]time.Time{}
+	httpAddr = flag.String("http", "192.168.1.7:8090", "Listen address")
+)
 
 func main() {
+	flag.Parse()
 	go ClearNonces()
 	http.HandleFunc("/process", processHandler)
-	http.ListenAndServe("192.168.1.7:8090", nil)
+	log.Printf("Listening on : %v\n", *httpAddr)
+	http.ListenAndServe(*httpAddr, nil)
 }
 
 func ClearNonces() {
