@@ -23,6 +23,7 @@ var (
 		"delay":       ProcessDelayOrder,
 		"delayrepeat": ProcessDelayRepeatOrder,
 		"changeurl":   ProcessChangedURL,
+		"changeverb":  ProcessChangedVerb,
 		"invalid":     ProcessInvalidJson,
 	}
 )
@@ -67,11 +68,11 @@ func ProcessAttack(oMsg SignedMessage, fnAttack fnMimAttack) ([]byte, int) {
 
 func ProcessNormalOrder(oMsg SignedMessage) ([]byte, int) {
 	jsonNewMsg, _ := json.Marshal(oMsg)
-	return processOrder(string(jsonNewMsg))
+	return processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 }
 
 func ProcessInvalidJson(oMsg SignedMessage) ([]byte, int) {
-	return processOrder("INVALID JSON")
+	return processOrder("INVALID JSON", oMsg.Order.Verb)
 }
 
 func ProcessChangedOrder(oMsg SignedMessage) ([]byte, int) {
@@ -82,7 +83,7 @@ func ProcessChangedOrder(oMsg SignedMessage) ([]byte, int) {
 	oMsg.Order.MaxPrice = newMaxPrice
 	oMsg.Order.NumShares = newNumShares
 	jsonNewMsg, _ := json.Marshal(oMsg)
-	return processOrder(string(jsonNewMsg))
+	return processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 }
 
 func ProcessChangedURL(oMsg SignedMessage) ([]byte, int) {
@@ -90,24 +91,32 @@ func ProcessChangedURL(oMsg SignedMessage) ([]byte, int) {
 	log.Printf("Changing URL from %v to %v\n", oMsg.Order.URL, newURL)
 	oMsg.Order.URL = newURL
 	jsonNewMsg, _ := json.Marshal(oMsg)
-	return processOrder(string(jsonNewMsg))
+	return processOrder(string(jsonNewMsg), oMsg.Order.Verb)
+}
+
+func ProcessChangedVerb(oMsg SignedMessage) ([]byte, int) {
+	newVerb := "DELETE"
+	log.Printf("Changing Method/Verb from %v to %v\n", oMsg.Order.Verb, newVerb)
+	oMsg.Order.Verb = newVerb
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	return processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 }
 
 func ProcessRepeatOrder(oMsg SignedMessage) ([]byte, int) {
 	jsonNewMsg, _ := json.Marshal(oMsg)
-	data1, code1 := processOrder(string(jsonNewMsg))
+	data1, code1 := processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 	time.Sleep(100 * time.Millisecond)
-	processOrder(string(jsonNewMsg))
+	processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 	return data1, code1
 
 }
 
 func ProcessDelayRepeatOrder(oMsg SignedMessage) ([]byte, int) {
 	jsonNewMsg, _ := json.Marshal(oMsg)
-	data1, code1 := processOrder(string(jsonNewMsg))
+	data1, code1 := processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 	go func() {
 		time.Sleep(7000 * time.Millisecond)
-		processOrder(string(jsonNewMsg))
+		processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 
 	}()
 	return data1, code1
@@ -116,7 +125,7 @@ func ProcessDelayRepeatOrder(oMsg SignedMessage) ([]byte, int) {
 func ProcessDelayOrder(oMsg SignedMessage) ([]byte, int) {
 	jsonNewMsg, _ := json.Marshal(oMsg)
 	time.Sleep(7000 * time.Millisecond)
-	return processOrder(string(jsonNewMsg))
+	return processOrder(string(jsonNewMsg), oMsg.Order.Verb)
 }
 
 func GetOriginalMessage(w http.ResponseWriter, r *http.Request) SignedMessage {
@@ -127,10 +136,10 @@ func GetOriginalMessage(w http.ResponseWriter, r *http.Request) SignedMessage {
 	return originalMsg
 }
 
-func processOrder(jsonNewMsg string) ([]byte, int) {
+func processOrder(jsonNewMsg string, verb string) ([]byte, int) {
 	client := &http.Client{}
 	remoteUrl := fmt.Sprintf("http://%v/process", *outHttpAddr)
-	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(jsonNewMsg))
+	req, _ := http.NewRequest(verb, remoteUrl, bytes.NewBufferString(jsonNewMsg))
 	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 	contents, _ := ioutil.ReadAll(resp.Body)
