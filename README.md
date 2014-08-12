@@ -3,7 +3,7 @@ goauth
 
 ##What is this?
 
-Goauth is a **for-learning-purposes-only** project that demonstrates a public/private key authentication system, various Man in the Middle attacks, and how the `gaserver` can determine when a request/order is legitimate or has been tampered with in some way.  The system is designed to (hopefully) authenticate a `user` and guard against replay attacks, delay attacks, tampering attacks(including the order itself, URL the http method/verb). 
+Goauth is a **for-learning-purposes-only** project that demonstrates a public/private key authentication system, various Man in the Middle attacks, and how the `gaserver` can determine when a request/order is legitimate or has been tampered with in some way.  The system is designed to (hopefully) authenticate a `user` and guard against replay attacks, delay attacks and tampering attacks(changing the order, the URL the http method/verb). 
 
 
 **Assuming OSX**  
