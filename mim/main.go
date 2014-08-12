@@ -26,11 +26,12 @@ func main() {
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	oMsg := GetOriginalMessage(w, r)
-	result, status := ProcessNormalOrder(oMsg)
+	//result, status := ProcessNormalOrder(oMsg)
 	//result, status := ProcessChangedOrder(oMsg)
 	//result, status := ProcessRepeatOrder(oMsg)
 	//result, status := ProcessDelayOrder(oMsg)
 	//result, status := ProcessDelayRepeatOrder(oMsg)
+	result, status := ProcessChangedURL(oMsg)
 	//result, status := ProcessInvalidJson()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -57,6 +58,14 @@ func ProcessChangedOrder(oMsg SignedMessage) ([]byte, int) {
 	log.Printf("Changing numShares from %v to %v\n", oMsg.Order.NumShares, newNumShares)
 	oMsg.Order.MaxPrice = newMaxPrice
 	oMsg.Order.NumShares = newNumShares
+	jsonNewMsg, _ := json.Marshal(oMsg)
+	return processOrder(string(jsonNewMsg))
+}
+
+func ProcessChangedURL(oMsg SignedMessage) ([]byte, int) {
+	newURL := "www.order-live.com:8090"
+	log.Printf("Changing URL from %v to %v\n", oMsg.Order.URL, newURL)
+	oMsg.Order.URL = newURL
 	jsonNewMsg, _ := json.Marshal(oMsg)
 	return processOrder(string(jsonNewMsg))
 }
