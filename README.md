@@ -1,8 +1,10 @@
 goauth
 ======
 
+##What is this?
 
-Decided to write this after reading:  [http://www.thebuzzmedia.com/designing-a-secure-rest-api-without-oauth-authentication/](http://www.thebuzzmedia.com/designing-a-secure-rest-api-without-oauth-authentication/).
+Goauth is a **for-learning-purposes-only** project that demonstrates a public/private key authentication system, various Man in the Middle attacks, and how the `gaserver` can determine when a request/order is legitimate or has been tampered with in some way.  The system is designed to (hopefully) authenticate a `user` and guard against replay attacks, delay attacks, tampering attacks(including the order itself, URL the http method/verb). 
+
 
 **Assuming OSX**  
 
@@ -17,3 +19,6 @@ Decided to write this after reading:  [http://www.thebuzzmedia.com/designing-a-s
 8. cd to the `gademo` director and run `go run main.go`.  If the previous steps have been done correctly, you won't need to specify any command line arguments for this command.  
 9. Open a browser and naviagte to [http://localhost:8080](http://localhost:8080).  
 10. Enter an integer for `No. Shares` and `Max Price` and then click `Save`
+
+
+Decided to write this after reading:  [http://www.thebuzzmedia.com/designing-a-secure-rest-api-without-oauth-authentication/](http://www.thebuzzmedia.com/designing-a-secure-rest-api-without-oauth-authentication/).
