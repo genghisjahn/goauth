@@ -13,11 +13,34 @@ import (
 
 var (
 	inHttpAddr  = flag.String("inhttp", "192.168.1.50:8090", "Accept requests at this address.")
-	outHttpAddr = flag.String("outhttp", "192.168.1.7:8090", "Send requests to this address")
+	outHttpAddr = flag.String("outhttp", "192.168.1.7:8090", "Send requests to this address.")
+	attack      = flag.String("attack", "none", "What type of MiM attack to run.  Default is none.")
+
+	MimAttacks = map[string]fnMimAttack{
+		"none":        ProcessNormalOrder,
+		"changeorder": ProcessChangedOrder,
+		"repeat":      ProcessRepeatOrder,
+		"delay":       ProcessDelayOrder,
+		"delayrepeat": ProcessDelayRepeatOrder,
+		"changeurl":   ProcessChangedURL,
+		"invalid":     ProcessInvalidJson,
+	}
 )
 
-func main() {
+type fnMimAttack func(oMsg SignedMessage) ([]byte, int)
+
+func init() {
 	flag.Parse()
+	if MimAttacks[*attack] == nil {
+		log.Printf("Valid Values are:\n")
+		for key, _ := range MimAttacks {
+			log.Println(key)
+		}
+		log.Fatalf("MiMAttack %v does not exist.", *attack)
+	}
+}
+func main() {
+
 	http.HandleFunc("/process", processHandler)
 	log.Printf("Listening on: %v\n", *inHttpAddr)
 	log.Printf("Sending to: %v\n", *outHttpAddr)
@@ -26,14 +49,10 @@ func main() {
 
 func processHandler(w http.ResponseWriter, r *http.Request) {
 	oMsg := GetOriginalMessage(w, r)
-	//result, status := ProcessNormalOrder(oMsg)
-	//result, status := ProcessChangedOrder(oMsg)
-	//result, status := ProcessRepeatOrder(oMsg)
-	//result, status := ProcessDelayOrder(oMsg)
-	//result, status := ProcessDelayRepeatOrder(oMsg)
-	result, status := ProcessChangedURL(oMsg)
-	//result, status := ProcessInvalidJson()
 
+	fnAttack := MimAttacks[*attack]
+
+	result, status := ProcessAttack(oMsg, fnAttack)
 	w.Header().Set("Content-Type", "application/json")
 	if status < 200 || status > 299 {
 		http.Error(w, string(result), status)
@@ -42,12 +61,16 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
+func ProcessAttack(oMsg SignedMessage, fnAttack fnMimAttack) ([]byte, int) {
+	return (fnAttack(oMsg))
+}
+
 func ProcessNormalOrder(oMsg SignedMessage) ([]byte, int) {
 	jsonNewMsg, _ := json.Marshal(oMsg)
 	return processOrder(string(jsonNewMsg))
 }
 
-func ProcessInvalidJson() ([]byte, int) {
+func ProcessInvalidJson(oMsg SignedMessage) ([]byte, int) {
 	return processOrder("INVALID JSON")
 }
 
