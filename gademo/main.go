@@ -6,9 +6,10 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
-
+	"log"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -17,13 +18,20 @@ import (
 	"github.com/genghisjahn/goauth"
 )
 
-var pubkey = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
-var privkey = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
+var (
+	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
+	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tfUcKON4ueVA=="
+	httpAddr = flag.String("http", "http://www.order-demo.com:8090", "Server address")
+)
 
 func main() {
+	flag.Parse()
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/send", sendHandler)
-	http.ListenAndServe(":8080", nil)
+	log.Printf("Remote requests will be sent to %v\n", *httpAddr)
+	log.Printf("Listening on localhost:8080")
+	http.ListenAndServe("localhost:8080", nil)
+
 }
 
 type Page struct {
@@ -53,8 +61,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendHandler(w http.ResponseWriter, r *http.Request) {
-	remoteUrl := "http://www.order-demo.com:8090/process"
-
+	remoteUrl := fmt.Sprintf("%v/process", *httpAddr)
+	log.Printf("Remote URL: %v\n", remoteUrl)
 	numshares, _ := strconv.Atoi(r.FormValue("numshares"))
 	maxprice, _ := strconv.Atoi(r.FormValue("maxprice"))
 	order := BuildOrder(numshares, maxprice, remoteUrl, "POST")
