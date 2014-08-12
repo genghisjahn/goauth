@@ -33,7 +33,8 @@ Goauth is a **for-learning-purposes-only** project that demonstrates a public/pr
   4.  `delay` Attemps to delay the order and the process at a later time.
   5.  `delayrepeat` Attemps to run an order and then run the same order after a small delay
   6.  `changeurl` Attemps to run the order against a different URL, say from `order-demo.com` to `order-live.com`
-  7.  `invalid` Passes invalid json.
+  7.  `changeverb` Attemps to change the Action method from `POST` to `DELETE`
+  8.  `invalid` Passes invalid json.
 
 
 
