@@ -28,6 +28,7 @@ func main() {
 	flag.Parse()
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/send", sendHandler)
+	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	log.Printf("Remote requests will be sent to %v\n", *httpAddr)
 	log.Printf("Listening on localhost:8080")
 	http.ListenAndServe("localhost:8080", nil)
@@ -38,6 +39,7 @@ type Page struct {
 	Title    string
 	Label    string
 	LoadTime time.Time
+	CSSLink  string
 }
 
 type OrderMessage struct {
@@ -56,7 +58,7 @@ type SignedMessage struct {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "Place an Order!", Label: "Place an Order", LoadTime: time.Now().Local()}
+	p := &Page{Title: "Place an Order!", Label: "Place an Order", LoadTime: time.Now().Local(), CSSLink: "<link href='css/bootstrap.min.css' rel='stylesheet'>"}
 	t, _ := template.ParseFiles("template1.html")
 	t.Execute(w, p)
 }
