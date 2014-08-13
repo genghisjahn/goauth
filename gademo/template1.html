@@ -21,34 +21,78 @@
   	<div class="row">
   <div class="col-md-4">&nbsp;</div>
   <div class="col-md-4"><h3>{{.Label}}</h3>
-	<form action="/send" method="POST">
-		<div class="table responsive">
-			<table class="table table-striped .text-center">
-				<tr>
-					<td>No. Shares:</td>
-					<td><input type="text" name="numshares" /></td>
-				</tr>
-				<tr>
-					<td>Max Price:</td>
-					<td><input type="text" name="maxprice" /></td>
-				</tr>
-				<tr>
-					<td>&nbsp;</td>
-					<td>
-							<input type="submit" value="Submit">
-					</td>
-				</tr>
-			</table>
-		</div>
-	</form>
+	<div class="table responsive">
+		<table class="table table-striped .text-center">
+			<tr>
+				<td>No. Shares:</td>
+				<td><input type="text" id="numshares" /></td>
+			</tr>
+			<tr>
+				<td>Max Price:</td>
+				<td><input type="text" id="maxprice" /></td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>
+					<a href="#" onClick="PostOrder();">Submit</a>
+				</td>
+			</tr>
+		</tr>
+		</table>
+		<br/>
+		<div class="alert alert-success" id="divSuccess" style="display:none;"  role="alert">
+					Success!
+				</div>
+				<div class="alert alert-danger" id="divFail" style="display:none;"  role="alert">
+					Failed!
+				</div>
+		<table class="table table-striped .text-center">
+				<td>Message:</td>
+				<td><div id="resMessage" /></td>
+			</tr>
+			<tr>
+				<td>Timestamp:</td>
+				<td><div id="resTimeStamp" /></td>
+			</tr>
+			
+		</tr>
+		</table>
+	</div>
+	
 	<div>Page loaded at <i>{{.LoadTime}}</i>.</div></div>
   <div class="col-md-4">&nbsp;</div>
 
     
 	</div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script type="JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script type="JavaScript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="resources/js/bootstrap.min.js"></script>
+
+    <!-- My js -->
+   <script>
+		var processRunning = false;
+		function PostOrder(){
+				$('#divSuccess').hide();
+				$('#divFail').hide();
+				var numshares = $('#numshares').val();
+				var maxprice = $('#maxprice').val();
+				$.ajax({
+				url: '/send',
+				type: 'POST',
+				data: {"numshares": numshares,"maxprice": maxprice},
+				success: function(response){
+						$('#resTimeStamp').html(response.DateTime);
+						$('#resMessage').html(response.Message);
+						$('#divSuccess').show();
+					},
+				error: function(xhr,status,error){
+					$('#resTimeStamp').html('');
+					$('#resMessage').html('Status: '+ xhr.status + ' - ' + xhr.responseText);
+					$('#divFail').show();
+				}
+				});
+		}	
+		</script>
   </body>
 </html>
