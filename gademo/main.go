@@ -73,6 +73,7 @@ func sendHandler(w http.ResponseWriter, r *http.Request) {
 
 	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(string(sm)))
 	resp, _ := client.Do(req)
+	log.Println("----------")
 	log.Println("Sent: ", string(sm))
 	log.Println("Return Code:", resp.Status)
 

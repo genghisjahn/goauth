@@ -44,6 +44,7 @@ const (
 	INVALID_HASH         = "Invalid Hash"
 	INVALID_JSON         = "Invalid JSON"
 	INVALID_URL          = "Invalid URL %v"
+	INVALID_ORDER        = "NumShares and MaxPrice must be integers greater than 0"
 	ORDER_SUCCESS        = "Order processed successfully"
 )
 
@@ -147,6 +148,15 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 	//Calculate the hash using the server copy of the private key.
 	sm2 := sm
 	sm2.SetHash([]byte(privkey))
+
+	/*Check if both NumShares and MaxPrice are both > 0.
+	If either of the values are 0, then most likely non integer data was submitted.
+	No matter the cause, the order should not be processed.
+	*/
+	if sm.Order.MaxPrice <= 0 || sm.Order.NumShares <= 0 {
+		rm.Message = INVALID_ORDER
+		return rm
+	}
 
 	/*
 		Compare the two hashes.
