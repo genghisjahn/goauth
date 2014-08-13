@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	//These keys are purely for demonstration purposes.  That won't provide access to anything, anywere at anytime.
+	//These keys are purely for demonstration purposes.  They won't provide access to anything, anywhere at anytime.
 	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tmUcKON4ueVA=="
 	httpAddr = flag.String("http", "www.order-demo.com:8090", "Server address")
@@ -35,8 +35,9 @@ func main() {
 }
 
 type Page struct {
-	Title string
-	Label string
+	Title    string
+	Label    string
+	LoadTime time.Time
 }
 
 type OrderMessage struct {
@@ -55,7 +56,7 @@ type SignedMessage struct {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	p := &Page{Title: "Place an Order!", Label: "Demo"}
+	p := &Page{Title: "Place an Order!", Label: "Place an Order", LoadTime: time.Now().Local()}
 	t, _ := template.ParseFiles("template1.html")
 	t.Execute(w, p)
 }
