@@ -1,17 +1,27 @@
-<h1>{{.Title}}</h1>
-
-<form action="/send" method="POST">
-<div>
-	<table>
-		<tr>
-			<td>No. Shares:</td>
-			<td><input type="text" name="numshares" /></td>
-		</tr>
-		<tr>
-			<td>Max Price:</td>
-			<td><input type="text" name="maxprice" /></td>
-		</tr>
-	</table>
-</div>
-<div><input type="submit" value="Save"></div>
-</form>
+<html>
+<head>
+<title>
+	{{.Title}}
+</title>
+</head>
+<body>
+	<h3>{{.Label}}</h3>
+	<form action="/send" method="POST">
+		<div>
+			<table>
+				<tr>
+					<td>No. Shares:</td>
+					<td><input type="text" name="numshares" /></td>
+				</tr>
+				<tr>
+					<td>Max Price:</td>
+					<td><input type="text" name="maxprice" /></td>
+				</tr>
+			</table>
+		</div>
+		<div>
+		<input type="submit" value="Submit"></div>
+	</form>
+	<div>Page loaded at <i>{{.LoadTime}}</i>.</div>
+</body>
+</html>
