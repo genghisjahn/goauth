@@ -14,27 +14,27 @@ import (
 	"time"
 )
 
-type OrderMessage struct {
-	NumShares     int
-	MaxPrice      int
-	PublicKey     []byte
-	Nonce         []byte
-	OrderDateTime time.Time
-	Verb          string
-	URL           string
+type RequestPayload struct {
+	Data
+	PublicKey       []byte
+	Nonce           []byte
+	RequestDateTime time.Time
+	Verb            string
+	URL             string
 }
 
-type SignedMessage struct {
-	Hash  string
-	Order OrderMessage
+type Data interface{}
+
+type SignedRequest struct {
+	Hash    string
+	Payload RequestPayload
 }
 
-type ReturnMessage struct {
-	Message   string
-	NumShares int
-	MaxPrice  int
-	DateTime  time.Time
-	Success   bool
+type ResponseMessage struct {
+	Message      string
+	ResponseData Data
+	DateTime     time.Time
+	Success      bool
 }
 
 const (
@@ -77,17 +77,17 @@ func ClearNonces() {
 	}
 }
 func processHandler(w http.ResponseWriter, r *http.Request) {
-	sm := SignedMessage{}
+	sr := SignedRequest{}
 	body, _ := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
-	if err := json.Unmarshal([]byte(body), &sm); err != nil {
+	if err := json.Unmarshal([]byte(body), &sr); err != nil {
 		http.Error(w, INVALID_JSON, http.StatusBadRequest)
 		log.Println(INVALID_JSON)
 		return
 	}
-	sm.Order.Verb = strings.ToUpper(r.Method)
+	sr.Payload.Verb = strings.ToUpper(r.Method)
 
-	rm := ProcessMessage(sm)
+	rm := ProcessRequest(sr)
 	if !rm.Success {
 		if rm.Message == PUBLIC_KEY_NOT_FOUND {
 			http.Error(w, rm.Message, http.StatusUnauthorized)
@@ -104,15 +104,15 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ProcessMessage(sm SignedMessage) ReturnMessage {
-	rm := ReturnMessage{}
+func ProcessRequest(sr SignedRequest) ResponseMessage {
+	rm := ResponseMessage{}
 	rm.DateTime = time.Now().Local()
 
 	/* Check for the correct URL
 	This demo should only process requests mean for: www.order-demo.com:8090
 	*/
-	if sm.Order.URL != "http://www.order-demo.com:8090/process" {
-		rm.Message = fmt.Sprintf(INVALID_URL, sm.Order.URL)
+	if sr.Payload.URL != "http://www.order-demo.com:8090/process" {
+		rm.Message = fmt.Sprintf(INVALID_URL, sr.Payload.URL)
 		return rm
 	}
 
@@ -120,7 +120,7 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 	   Check for a valid public key.
 	   This would be stored in some kind of data repository.
 	*/
-	if string(sm.Order.PublicKey) != pubkey {
+	if string(sr.Payload.PublicKey) != pubkey {
 		rm.Message = PUBLIC_KEY_NOT_FOUND
 		return rm
 	}
@@ -129,47 +129,49 @@ func ProcessMessage(sm SignedMessage) ReturnMessage {
 		Make sure the nonce hasn't been used already.
 		This prevents replay attacks.
 	*/
-	if !nonceLog[string(sm.Order.Nonce)].IsZero() {
+	if !nonceLog[string(sr.Payload.Nonce)].IsZero() {
 		rm.Message = DUPLICATE_NONCE
 		return rm
 	}
-	nonceLog[string(sm.Order.Nonce)] = time.Now().Local()
+	nonceLog[string(sr.Payload.Nonce)] = time.Now().Local()
 
 	/*
 		Make sure that the request is within time contraints.
 		This prevents delay attacks.
 	*/
-	duration := time.Since(sm.Order.OrderDateTime)
+	duration := time.Since(sr.Payload.RequestDateTime)
 	if duration > 3*time.Second {
 		rm.Message = EXPIRED_TIMESTAMP
 		return rm
 	}
 
 	//Calculate the hash using the server copy of the private key.
-	sm2 := sm
-	sm2.SetHash([]byte(privkey))
+	sr2 := sr
+	sr2.SetHash([]byte(privkey))
 
 	/*Check if both NumShares and MaxPrice are both > 0.
 	If either of the values are 0, then most likely non integer data was submitted.
 	No matter the cause, the order should not be processed.
 	*/
-	if sm.Order.MaxPrice <= 0 || sm.Order.NumShares <= 0 {
-		rm.Message = INVALID_ORDER
-		return rm
-	}
-
+	/*
+		TODO make this work with the empty interface.
+		Check to see if the JSON changed.
+		if sm.Order.MaxPrice <= 0 || sm.Order.NumShares <= 0 {
+			rm.Message = INVALID_ORDER
+			return rm
+		}
+	*/
 	/*
 		Compare the two hashes.
 		If they don't match, then something has changed in the request in transit
 		and it is not a valid request.
 	*/
-	if sm.Hash != sm2.Hash {
+	if sr.Hash != sr2.Hash {
 		rm.Message = INVALID_HASH
 	} else {
 		//The request is valid.
 		rm.Success = true
-		rm.MaxPrice = sm.Order.MaxPrice
-		rm.NumShares = sm.Order.NumShares
+		rm.ResponseData = sr.Payload.Data
 		rm.Message = ORDER_SUCCESS
 	}
 
@@ -183,9 +185,9 @@ func PrintNonceLog() {
 	}
 }
 
-func (sm *SignedMessage) SetHash(privkey []byte) {
-	jsonbody, _ := json.Marshal(sm.Order)
+func (sr *SignedRequest) SetHash(privkey []byte) {
+	jsonbody, _ := json.Marshal(sr.Payload)
 	h := hmac.New(sha512.New, privkey)
 	h.Write([]byte(jsonbody))
-	sm.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
+	sr.Hash = base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
