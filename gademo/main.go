@@ -21,7 +21,7 @@ var (
 	//These keys are purely for demonstration purposes.  They won't provide access to anything, anywhere at anytime.
 	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tmUcKON4ueVA=="
-	httpAddr = flag.String("http", "www.order-demo.com:8090", "Server address")
+	httpAddr = flag.String("http", "localhost:8085", "Server address")
 )
 
 func main() {
@@ -73,7 +73,6 @@ func sendHandler(w http.ResponseWriter, r *http.Request) {
 	signedMsg.SetHash([]byte(privkey))
 	sm, _ := json.Marshal(signedMsg)
 	client := &http.Client{}
-
 	req, _ := http.NewRequest("POST", remoteUrl, bytes.NewBufferString(string(sm)))
 	resp, _ := client.Do(req)
 	log.Println("----------")

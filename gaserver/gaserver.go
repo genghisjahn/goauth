@@ -53,7 +53,7 @@ var (
 	pubkey   = "mbRgpR2eYAdJkhvrfwjlmMC+L/0Vbrj4KvVo5nvnScwsx25LK+tPE3AM/IMcHuDW5zzp4Kup9xKd5YXupRJHzw=="
 	privkey  = "7F22ZeY+mlHtALq3sXcjrLdcID7whhVIQ5zD4bl4raKdBTYVgAjfdbvdfB5lmQa4wVP1o4frD5tmUcKON4ueVA=="
 	nonceLog = map[string]time.Time{}
-	httpAddr = flag.String("http", "192.168.1.7:8090", "Listen address")
+	httpAddr = flag.String("http", "localhost:8090", "Listen address")
 )
 
 func main() {
@@ -86,7 +86,6 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sr.Payload.Verb = strings.ToUpper(r.Method)
-
 	rm := ProcessRequest(sr)
 	if !rm.Success {
 		if rm.Message == PUBLIC_KEY_NOT_FOUND {
@@ -109,9 +108,11 @@ func ProcessRequest(sr SignedRequest) ResponseMessage {
 	rm.DateTime = time.Now().Local()
 
 	/* Check for the correct URL
-	This demo should only process requests mean for: www.order-demo.com:8090
+	This demo should only process requests mean for: localhost:8090
 	*/
-	if sr.Payload.URL != "http://www.order-demo.com:8090/process" {
+	log.Println("Payload URL: ", sr.Payload.URL)
+	log.Println(sr)
+	if sr.Payload.URL != "http://localhost:8085" {
 		rm.Message = fmt.Sprintf(INVALID_URL, sr.Payload.URL)
 		return rm
 	}
