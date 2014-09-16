@@ -13,7 +13,7 @@ import (
 
 var (
 	inHttpAddr  = flag.String("inhttp", "192.168.1.50:8090", "Accept requests at this address.")
-	outHttpAddr = flag.String("outhttp", "192.168.1.7:8090", "Send requests to this address.")
+	outHttpAddr = flag.String("outhttp", "192.168.1.9:8090", "Send requests to this address.")
 	attack      = flag.String("attack", "none", "What type of MiM attack to run.  Default is none.")
 
 	MimAttacks = map[string]fnMimAttack{
